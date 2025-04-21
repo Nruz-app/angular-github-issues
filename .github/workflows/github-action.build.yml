@@ -34,12 +34,20 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Crear environment.ts con token secreto
+      - name: Obtener issues desde GitHub API con token
+        run: |
+          mkdir -p src/assets
+          curl -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/angular/angular/issues \
+               -o src/assets/issues.json
+
+      - name: Crear environment.ts para producción (sin token)
         run: |
           mkdir -p src/environments
           echo "export const environment = {" > src/environments/environment.ts
           echo "  baseUrl: 'https://api.github.com/repos/angular/angular'," >> src/environments/environment.ts
-          echo "  gitHubToken: '${{ secrets.GH_TOKEN }}'," >> src/environments/environment.ts
+          echo "  gitHubToken: ''," >> src/environments/environment.ts
           echo "};" >> src/environments/environment.ts
 
       - name: Compilar proyecto Angular (producción)
