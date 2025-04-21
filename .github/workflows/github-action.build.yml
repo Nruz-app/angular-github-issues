@@ -1,23 +1,16 @@
-name: Angular Pokemon SSR
-
+name: Angular GITHUB ISSUES
 on:
   push:
     branches:
-      - main  # Cambia esto si usas otra rama para producción
+      - main
 
 concurrency:
-  # Define un grupo de concurrencia basado en la referencia de la rama
   group: ci-${{ github.ref }}
-  # Cancela cualquier ejecución anterior en progreso para esta rama
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
-#    strategy:
-#      matrix:
-#        node-version: [18.x,20.x,22.x]
 
     steps:
       - name: Clonar el repositorio
@@ -25,7 +18,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      #https://github.com/marketplace/actions/git-semantic-version?version=v4.0.3
       - name: Git Semantic Version
         uses: PaulHatch/semantic-version@v4.0.3
         id: version
@@ -34,56 +26,40 @@ jobs:
           minor_pattern : "feat"
           format: "${major}.${minor}.${patch}-prerelease${increment}"
 
-
-      - name: Install packages
-        run: npm ci
-
-      - name: Build Project
-        run: npm run build
-
-      - name: Setup Nodejs
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Instalall Depencias
+      - name: Instalar dependencias
         run: npm ci
 
-      - name: Reemplazar environment.ts con el token del secreto
+      - name: Crear environment.ts con token secreto
         run: |
+          mkdir -p src/environments
           echo "export const environment = {" > src/environments/environment.ts
           echo "  baseUrl: 'https://api.github.com/repos/angular/angular'," >> src/environments/environment.ts
           echo "  gitHubToken: '${{ secrets.GH_TOKEN }}'," >> src/environments/environment.ts
           echo "};" >> src/environments/environment.ts
 
-      - name: Instalall Depencias
+      - name: Compilar proyecto Angular (producción)
         run: npx ng build --configuration=production --base-href=/angular-github-issues/
 
       - name: Instalar angular-cli-ghpages
         run: npm install -g angular-cli-ghpages
 
-#      - name: Deploy a GitHub Pages
-#        run: npx angular-cli-ghpages --dir=dist/gifs-app/browser
-
-      - name: Deploy to GitHub Pages
+      - name: Deploy a GitHub Pages
         uses: JamesIves/github-pages-deploy-action@releases/v4
         with:
-            token: ${{ secrets.GH_TOKEN }}
-            branch: gh-pages
-            folder: dist/angular-github-issues/browser
-            clean: true
-
-
-#      - name: deploy to Github Pages
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-#        run:
-#          npm run ng --deploy --repo=https://github.com/Nruz-app/angular-gifs-app.git --name="Nruz-app" --email="ruznicolas176@gmail.com" --base-href=/angular-gifs-app/
+          token: ${{ secrets.GH_TOKEN }}
+          branch: gh-pages
+          folder: dist/angular-github-issues/browser
+          clean: true
 
       - name: Docker Login
         env:
-            DOCKER_USER: ${{ secrets.DOCKER_USER }}
-            DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
 
