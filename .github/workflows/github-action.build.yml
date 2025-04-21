@@ -53,7 +53,7 @@ jobs:
         with:
           token: ${{ secrets.GH_TOKEN }}
           branch: gh-pages
-          folder: dist/angular-github-issues/browser
+          folder: dist/github-issues/browser
           clean: true
 
       - name: Docker Login
