@@ -1,0 +1,60 @@
+<h1>GitHub Issues</h1>
+<dir class="my-5 border-b-2 border-blue-600"></dir>
+
+<section class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+  <!-- Botones para controlar el Estado (State) -->
+  <div class="flex flex-col col-span-3">
+    <div class="flex gap-2">
+      <button
+        [class.active]="issuesService.selectedState() === 'all'"
+        (click)="onChangeState('all')"
+        class="btn active">
+        All
+      </button>
+      <button
+        [class.active]="issuesService.selectedState() === 'open'"
+        (click)="onChangeState('open')"
+        class="btn">
+        Open
+      </button>
+      <button
+        [class.active]="issuesService.selectedState() === 'closed'"
+        (click)="onChangeState('closed')"
+        class="btn">
+          Closed
+      </button>
+    </div>
+  </div>
+
+  <!-- Listado -->
+  <div class="mt-4 flex flex-col col-span-2">
+    <!-- Todo: Listado de issues -->
+    @for (issue of issuesQuery.data(); track issue.id) {
+
+      <issue-item [issue] = "issue" />
+
+    }
+    <!-- -->
+    @empty {
+
+      @if( issuesQuery.isLoading() ) {
+        <p>Cargando Issues</p>
+      }
+      <!-- -->
+      @else {
+        <p>No hay issues que mostrar</p>
+      }
+    }
+  </div>
+
+  <!-- Labels -->
+  <div>
+    @if( labelsQuery.isLoading() ) {
+      <p>Estamos cargando</p>
+    }
+    <!-- -->
+    @else {
+      <labels-selector [labels]="labelsQuery.data() ?? []" />
+    }
+  </div>
+</section>
